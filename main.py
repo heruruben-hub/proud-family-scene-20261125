@@ -24,10 +24,20 @@ def main() -> None:
         raise SystemExit(f"entry must be 1-280 characters, got {len(text)}")
     if not text.strip():
         raise SystemExit("entry must not be only whitespace")
+    if text != text.strip():
+        raise SystemExit("entry must not start or end with whitespace")
+    # Round-trip through UTF-8: the gate reads the file as UTF-8 text,
+    # so anything that does not survive the round-trip is rejected here.
+    encoded = text.encode("utf-8")
+    if encoded.decode("utf-8") != text:
+        raise SystemExit("entry does not round-trip as UTF-8")
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8", newline="") as f:
         f.write(text)
-    print(f"wrote {len(text)} characters to {OUTPUT_PATH}")
+    print(
+        f"wrote {len(text)} characters ({len(encoded)} bytes) "
+        f"to {OUTPUT_PATH}"
+    )
 
 
 if __name__ == "__main__":
